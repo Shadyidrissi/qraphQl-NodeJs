@@ -25,6 +25,7 @@ const schema = buildSchema(`
     type Mutation {
         createUser(input: InputCreateUser): User
         deleteUser(id: String): String
+        deleteAllUser: String
     }   
 `)
 
@@ -47,11 +48,21 @@ const resolvers = {
     },
     showOneUser: async ({id}) => {
         const user = await User.findById(id); 
+        const jsonUser= user.toJSON()
+        console.log(jsonUser.name)
         return user; 
     },
     deleteUser:async ({id})=>{
+        const user = await User.findById(id); 
+        if (!user) {
+            return "this is user is not funding"
+        }
         await User.deleteOne({_id:id})
-        return "done deleting"
+        return `Done delete User  , NAME : ${user.name} , GMAIL : ${user.gmail}`
+    },
+    deleteAllUser:async ()=>{
+        await User.deleteOne()
+        return "Done All Deleting"
     } 
 }
 
