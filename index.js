@@ -20,6 +20,7 @@ const schema = buildSchema(`
     type Query {
         hello: String
         showAllUsers:[User]
+        showOneUser(id:String):User
     }  
     type Mutation {
         createUser(input: InputCreateUser): User
@@ -42,6 +43,10 @@ const resolvers = {
     showAllUsers: async () => {
         const users = await User.find(); 
         return users; 
+    },
+    showOneUser: async ({id}) => {
+        const user = await User.findById(id); 
+        return user; 
     }       
 }
 
