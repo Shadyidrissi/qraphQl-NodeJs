@@ -24,6 +24,7 @@ const schema = buildSchema(`
     }  
     type Mutation {
         createUser(input: InputCreateUser): User
+        deleteUser(id: String): String
     }   
 `)
 
@@ -47,7 +48,11 @@ const resolvers = {
     showOneUser: async ({id}) => {
         const user = await User.findById(id); 
         return user; 
-    }       
+    },
+    deleteUser:async ({id})=>{
+        await User.deleteOne({_id:id})
+        return "done deleting"
+    } 
 }
 
 
