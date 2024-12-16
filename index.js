@@ -19,6 +19,7 @@ const schema = buildSchema(`
     }
     type Query {
         hello: String
+        showAllUsers:[User]
     }  
     type Mutation {
         createUser(input: InputCreateUser): User
@@ -37,8 +38,11 @@ const resolvers = {
             password,
             gmail
         }
-    }
-
+    },
+    showAllUsers: async () => {
+        const users = await User.find(); 
+        return users; 
+    }       
 }
 
 
