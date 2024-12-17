@@ -26,6 +26,7 @@ const schema = buildSchema(`
         createUser(input: InputCreateUser): User
         deleteUser(id: String): String
         deleteAllUser: String
+        loginUser(gmail:String,password:String):String
     }   
 `)
 
@@ -63,7 +64,19 @@ const resolvers = {
     deleteAllUser:async ()=>{
         await User.deleteMany()
         return "Done All Deleting"
-    } 
+    },
+    loginUser: async ({ gmail, password }) => {
+        // Use findOne to match gmail and password
+        const user = await User.findOne({ gmail: gmail, password: password });
+        
+        if (user) {
+            console.log("Login Successful", gmail, password);
+            return "Login Successful";
+        } else {
+            console.log("Invalid Credentials", gmail, password);
+            return "Invalid Credentials";
+        }
+    }    
 }
 
 
