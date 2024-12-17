@@ -61,7 +61,7 @@ const resolvers = {
         return `Done delete User  , NAME : ${user.name} , GMAIL : ${user.gmail}`
     },
     deleteAllUser:async ()=>{
-        await User.deleteOne()
+        await User.deleteMany()
         return "Done All Deleting"
     } 
 }
