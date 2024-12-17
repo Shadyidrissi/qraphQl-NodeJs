@@ -5,6 +5,7 @@ const { buildSchema } = require('graphql')
 const { qraphqlHttp, graphqlHTTP } = require('express-graphql')
 const mongoose = require('mongoose');
 const User = require('./modules/User')
+const bcrypt = require('bcrypt'); 
 
 const schema = buildSchema(`
     type User {
@@ -35,11 +36,13 @@ const resolvers = {
     hello: () => "hello world",
     createUser:async({input})=>{
         const {name,password,gmail}= input
-        const addNewUser= new  User({name, password , gmail})
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const addNewUser= new  User({name, password : hashedPassword , gmail})
         await addNewUser.save()
         return { 
             name,
-            password,
+            password:hashedPassword,
             gmail
         }
     },
@@ -67,13 +70,16 @@ const resolvers = {
     },
     loginUser: async ({ gmail, password }) => {
         // Use findOne to match gmail and password
-        const user = await User.findOne({ gmail: gmail, password: password });
-        
+        const user = await User.findOne({ gmail: gmail });
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return "Error Data Not Correct"
+        }
         if (user) {
-            console.log("Login Successful", gmail, password);
+            console.log("Login Successful");
             return "Login Successful";
         } else {
-            console.log("Invalid Credentials", gmail, password);
+            console.log("Invalid Credentials");
             return "Invalid Credentials";
         }
     }    
