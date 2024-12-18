@@ -5,7 +5,10 @@ const { buildSchema } = require('graphql')
 const { qraphqlHttp, graphqlHTTP } = require('express-graphql')
 const mongoose = require('mongoose');
 const User = require('./modules/User')
-const bcrypt = require('bcrypt'); 
+const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const dotenv =require('dotenv').config()
+
 
 const schema = buildSchema(`
     type User {
@@ -34,37 +37,37 @@ const schema = buildSchema(`
 
 const resolvers = {
     hello: () => "hello world",
-    createUser:async({input})=>{
-        const {name,password,gmail}= input
+    createUser: async ({ input }) => {
+        const { name, password, gmail } = input
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const addNewUser= new  User({name, password : hashedPassword , gmail})
+        const addNewUser = new User({ name, password: hashedPassword, gmail })
         await addNewUser.save()
-        return { 
+        return {
             name,
-            password:hashedPassword,
+            password: hashedPassword,
             gmail
         }
     },
     showAllUsers: async () => {
-        const users = await User.find(); 
-        return users; 
+        const users = await User.find();
+        return users;
     },
-    showOneUser: async ({id}) => {
-        const user = await User.findById(id); 
-        const jsonUser= user.toJSON()
+    showOneUser: async ({ id }) => {
+        const user = await User.findById(id);
+        const jsonUser = user.toJSON()
         console.log(jsonUser.name)
-        return user; 
+        return user;
     },
-    deleteUser:async ({id})=>{
-        const user = await User.findById(id); 
+    deleteUser: async ({ id }) => {
+        const user = await User.findById(id);
         if (!user) {
             return "this is user is not funding"
         }
-        await User.deleteOne({_id:id})
+        await User.deleteOne({ _id: id })
         return `Done delete User  , NAME : ${user.name} , GMAIL : ${user.gmail}`
     },
-    deleteAllUser:async ()=>{
+    deleteAllUser: async () => {
         await User.deleteMany()
         return "Done All Deleting"
     },
@@ -72,17 +75,18 @@ const resolvers = {
         // Use findOne to match gmail and password
         const user = await User.findOne({ gmail: gmail });
         const isPasswordValid = await bcrypt.compare(password, user.password);
+        const token = jwt.sign({userId: user.id},process.env.KEY_JWT, { expiresIn: "1h" });
         if (!isPasswordValid) {
             return "Error Data Not Correct"
         }
         if (user) {
-            console.log("Login Successful");
-            return "Login Successful";
+            console.log(token);
+            return `Login Successful ${token}`;
         } else {
             console.log("Invalid Credentials");
             return "Invalid Credentials";
         }
-    }    
+    }
 }
 
 
