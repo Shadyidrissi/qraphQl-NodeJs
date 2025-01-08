@@ -12,6 +12,7 @@ const dotenv =require('dotenv').config()
 
 const schema = buildSchema(`
     type User {
+        id:ID
         name: String
         password: String
         gmail: String
